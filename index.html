@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Vectors in Calc III</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/white.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section data-markdown>
+          <script type="text/template">
+            Vectors in Calc 3
+            ====
+            Raymond Arndorfer
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+            "Normal" Calculus v. Multivariable Calculus
+            ---
+
+            Normal Calculus: <!-- .element: class="fragment" data-fragment-index="1" -->
+            * Most of Calc B.C. <!-- .element: class="fragment" data-fragment-index="1" -->
+            * $f(x) = \ldots$ <!-- .element: class="fragment" data-fragment-index="1" -->
+
+            Multivariable Calculus: <!-- .element: class="fragment" data-fragment-index="2" -->
+            * Calc III and up <!-- .element: class="fragment" data-fragment-index="2" -->
+            * $f(x, y, z, \ldots) = \ldots$   <!-- .element: class="fragment" data-fragment-index="2" -->
+
+            Parametric & Vector functions are special <!-- .element: class="fragment" data-fragment-index="3" -->
+          </script>
+        </section>
+        <section data-background-iframe="iframe/notation.html">
+          <section data-markdown="markdown/notation.md">
+          </section>
+        </section>
+        <section data-background-iframe="iframe/functions.html">
+          <section data-markdown="markdown/functions.md">
+          </section>
+        </section>
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+          { src: 'plugin/math-katex/math-katex.js', async: true }
+				],
+        controls: false,
+			});
+      
+      Reveal.addEventListener( 'slidechanged', function( event ) {
+        var colorSlides = document.querySelector(".backgrounds > .present > .present + .future")
+        if (colorSlides != null) {
+          colorSlides.style.display = "block";
+        }
+	      var iframe = document.querySelector(".backgrounds > .present > iframe")
+        if(iframe != null) {
+          iframe.contentWindow.postMessage({index: event.indexv}, '*');
+        }
+      });
+		</script>
+	</body>
+</html>

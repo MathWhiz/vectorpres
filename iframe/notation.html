@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Vector Notation</title>
+  <script src="../mathbox/build/mathbox-bundle.js"></script>
+  <script src="https://unpkg.com/mathjs@4.4.2/dist/math.min.js"></script>
+  <script src="../js/noise.js"></script>
+  <link rel="stylesheet" href="../mathbox/build/mathbox.css">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+</head>
+<body>
+  <script>
+    noise.seed(math.random());
+    var mathbox = mathBox({
+      plugins: ['core', 'controls', 'cursor', 'mathbox'],
+      controls: {
+        klass: THREE.OrbitControls,
+      },
+    });
+    var three = mathbox.three;
+    three.renderer.setClearColor(new THREE.Color(0xFFFFFF), 1.0);
+    var red = new THREE.Color(0xC02050);
+    var blue = new THREE.Color(0x3090FF);
+    var green = new THREE.Color(0x50A000);
+    
+    mathbox.set('focus', 3);
+    
+    var present = mathbox.present({
+      index: 0,
+    });
+    
+    var slide = present.slide({
+      to: 14,
+    });
+// Place camera
+    var camera =
+      present
+      .camera({
+        proxy: true,
+        position: [1, 1, 3],
+      });
+
+    // 2D cartesian
+    var view =
+      present
+      .cartesian({
+        range: [[-1.5, 1.5], [-1.5, 1.5], [-1.5, 1.5]],
+        scale: [1, 1, 1],
+      });
+
+    // Axes + grid
+    view
+      .axis({
+        axis: 1,
+        width: 3,
+      })
+      .axis({
+        axis: 2,
+        width: 3,
+      }).axis({
+      axis: 3,
+      width: 3,
+    })
+      .grid({
+      axes:[1,3],
+        width: 2,  
+        divideX: 15,
+        divideY: 15,        
+      });
+    
+    function noisevector(i, t) {
+      var speed = .1;
+      var vector = math.matrix([noise.simplex3(i, 1, speed * t), noise.simplex3(i, 2, speed * t), noise.simplex3(i, 3, speed * t)]);
+      return vector;
+    }
+    // Draw vectors
+    var vectora =
+      slide.interval({
+        expr: function (emit, x, i, t) {
+          var a = noisevector(1, t);
+          emit(0, 0, 0);
+          emit(a.subset(math.index(0)), a.subset(math.index(1)), a.subset(math.index(2)));
+        },
+        width: 0,
+        channels: 3,
+        items: 2,
+      })
+      .vector({
+        end: true,
+        width: 5,
+        color: blue,
+      });
+    
+    var vectorb =
+      slide.interval({
+        expr: function (emit, x, i, t) {
+          var b = noisevector(2, t);
+          emit(0, 0, 0);
+          emit(b.subset(math.index(0)), b.subset(math.index(1)), b.subset(math.index(2)));
+        },
+        width: 0,
+        channels: 3,
+        items: 2,
+      })
+      .vector({
+        end: true,
+        width: 5,
+        color: red,
+      });
+
+    present.slide();
+    
+    var addsub =
+      present.slide({
+        steps: 2,
+      })
+    
+    var addvector = addsub.interval({
+        expr: function (emit, x, i, t) {
+          var a = noisevector(1, t);
+          var b = noisevector(2, t);
+          var c = math.add(a, b);
+          emit(0, 0, 0);
+          emit(c.subset(math.index(0)), c.subset(math.index(1)), c.subset(math.index(2)));
+        },
+        width: 0,
+        channels: 3,
+        items: 2,
+      })
+      .vector({
+        end: true,
+        width: 5,
+        color: green,
+      });
+    
+    var subvector = addsub.interval({
+        expr: function (emit, x, i, t) {
+          var a = noisevector(1, t);
+          var b = noisevector(2, t);
+          var c = math.subtract(a, b);
+          emit(0, 0, 0);
+          emit(c.subset(math.index(0)), c.subset(math.index(1)), c.subset(math.index(2)));
+        },
+        width: 0,
+        channels: 3,
+        items: 2,
+      })
+      .vector({
+        end: true,
+        width: 5,
+        color: green,
+      });
+    
+    var scalmult = present.slide({
+      steps: 2,
+    });
+    
+    var scalmulta = scalmult.interval({
+        expr: function (emit, x, i, t) {
+          var a = noisevector(1, t);
+          var c = math.multiply(.5, a);
+          emit(0, 0, 0);
+          emit(c.subset(math.index(0)), c.subset(math.index(1)), c.subset(math.index(2)));
+        },
+        width: 0,
+        channels: 3,
+        items: 2,
+      })
+      .vector({
+        end: true,
+        width: 5,
+        color: green,
+      });
+    
+    var scalmultb = scalmult.interval({
+        expr: function (emit, x, i, t) {
+          var b = noisevector(2, t);
+          var c = math.multiply(.5, b);
+          emit(0, 0, 0);
+          emit(c.subset(math.index(0)), c.subset(math.index(1)), c.subset(math.index(2)));
+        },
+        width: 0,
+        channels: 3,
+        items: 2,
+      })
+      .vector({
+        end: true,
+        width: 5,
+        color: green,
+      });
+    
+    var unitvector = present.slide({
+      steps: 2,
+    });
+    
+    var uva = unitvector.interval({
+        expr: function (emit, x, i, t) {
+          var a = noisevector(1, t);
+          var b = noisevector(2, t);
+          var c = math.eval('a/(sqrt(a[1]^2 + a[2]^2 +a[3]^2))', {
+            a: a,
+          });
+          emit(0, 0, 0);
+          emit(c.subset(math.index(0)), c.subset(math.index(1)), c.subset(math.index(2)));
+        },
+        width: 0,
+        channels: 3,
+        items: 2,
+      })
+      .vector({
+        end: true,
+        width: 5,
+        color: green,
+      });
+    
+    var uvb = unitvector.interval({
+        expr: function (emit, x, i, t) {
+          var a = noisevector(1, t);
+          var b = noisevector(2, t);
+          var c = math.eval('a/(sqrt(a[1]^2 + a[2]^2 + a[3]^2))', {
+            a: b,
+          });
+          emit(0, 0, 0);
+          emit(c.subset(math.index(0)), c.subset(math.index(1)), c.subset(math.index(2)));
+        },
+        width: 0,
+        channels: 3,
+        items: 2,
+      })
+      .vector({
+        end: true,
+        width: 5,
+        color: green,
+      });
+    
+    var projection = present.slide({
+      steps: 2,
+    });
+    
+    var projab = projection.interval({
+        expr: function (emit, x, i, t) {
+          var a = noisevector(1, t);
+          var b = noisevector(2, t);
+          var c = math.eval('dot(a,b)/(sqrt(a[1]^2 + a[2]^2 +a[3]^2))^2 * a', {
+            a: a,
+            b: b,
+          });
+          emit(0, 0, 0);
+          emit(c.subset(math.index(0)), c.subset(math.index(1)), c.subset(math.index(2)));
+        },
+        width: 0,
+        channels: 3,
+        items: 2,
+      })
+      .vector({
+        end: true,
+        width: 5,
+        color: green,
+      });
+    
+    var projba = projection.interval({
+        expr: function (emit, x, i, t) {
+          var a = noisevector(1, t);
+          var b = noisevector(2, t);
+          var c = math.eval('dot(a,b)/(sqrt(a[1]^2 + a[2]^2 +a[3]^2))^2 * a', {
+            b: a,
+            a: b,
+          });
+          emit(0, 0, 0);
+          emit(c.subset(math.index(0)), c.subset(math.index(1)), c.subset(math.index(2)));
+        },
+        width: 0,
+        channels: 3,
+        items: 2,
+      })
+      .vector({
+        end: true,
+        width: 5,
+        color: green,
+      });
+    
+    var crossprod = present.slide({
+      steps: 2,
+    }).interval({
+        expr: function (emit, x, i, t) {
+          var a = noisevector(1, t);
+          var b = noisevector(2, t);
+          var c = math.cross(a,b);
+          emit(0, 0, 0);
+          emit(c.subset(math.index(0)), c.subset(math.index(1)), c.subset(math.index(2)));
+        },
+        width: 0,
+        channels: 3,
+        items: 2,
+      })
+      .vector({
+        end: true,
+        width: 5,
+        color: green,
+      });
+    
+    window.onmessage = function(e) {
+      present[0].set('index', e.data.index);
+    }
+      window.onkeydown = function(e) {
+        console.log('keypress!' + e.keyCode);
+        switch(e.keyCode){
+          case 37:
+          case 38:
+            present[0].set('index', present[0].get('index') - 1);
+          break;
+          case 39:
+          case 40:
+            present[0].set('index', present[0].get('index') + 1);
+          break;
+        }
+        console.log(present[0].get('index') + '/' + present[0].get('length'));
+      }
+
+     
+  </script>
+</body>
+</html>

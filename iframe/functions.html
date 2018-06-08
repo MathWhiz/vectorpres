@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Vector Notation</title>
+  <script src="../mathbox/build/mathbox-bundle.js"></script>
+  <script src="https://unpkg.com/mathjs@4.4.2/dist/math.min.js"></script>
+  <script src="../js/noise.js"></script>
+  <link rel="stylesheet" href="../mathbox/build/mathbox.css">
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+</head>
+<body>
+  <script>
+    noise.seed(math.random());
+    var mathbox = mathBox({
+      plugins: ['core', 'controls', 'cursor', 'mathbox'],
+      controls: {
+        klass: THREE.OrbitControls,
+      },
+    });
+    var three = mathbox.three;
+    three.renderer.setClearColor(new THREE.Color(0xFFFFFF), 1.0);
+    var red = new THREE.Color(0xC02050);
+    var blue = new THREE.Color(0x3090FF);
+    var green = new THREE.Color(0x50A000);
+    
+    mathbox.set('focus', 3);
+    
+    var present = mathbox.present({
+      index: 0,
+    });
+    
+// Place camera
+    var camera =
+      present
+      .camera({
+        proxy: true,
+        position: [1, 1, 3],
+      });
+
+    // 2D cartesian
+    var view =
+      present
+      .cartesian({
+        range: [[-4, 4], [-4, 4], [-4, 4]],
+        scale: [1, 1, 1],
+      });
+
+    // Axes + grid
+    view
+      .axis({
+        axis: 1,
+        width: 3,
+      })
+      .axis({
+        axis: 2,
+        width: 3,
+      }).axis({
+      axis: 3,
+      width: 3,
+    })
+      .grid({
+      axes:[1,3],
+        width: 2,  
+        divideX: 15,
+        divideY: 15,        
+      });
+
+    
+    var xvec = math.parse('2cos(2t)+cos(2t)*cos(5t)');
+    var x = xvec.compile();
+    var yvec = math.parse('2sin(2t)+sin(2t)*cos(5t)');
+    var y = yvec.compile();
+    var zvec = math.parse('sin(5t)');
+    var z = zvec.compile();
+    
+    var dxvec = math.derivative(xvec,'t');
+    var dx = dxvec.compile();
+    var dyvec = math.derivative(yvec,'t');
+    var dy = dyvec.compile();
+    var dzvec = math.derivative(zvec,'t');
+    var dz = dzvec.compile();
+    
+    var ddxvec = math.derivative(dxvec,'t');
+    var ddx = ddxvec.compile();
+    var ddyvec = math.derivative(dyvec,'t');
+    var ddy = ddyvec.compile();
+    var ddzvec = math.derivative(dzvec,'t');
+    var ddz = ddzvec.compile();
+    
+    var curveslide = view.slide({
+      to: 4,
+      steps: 2,
+    });
+    
+    var curve = curveslide.interval({
+        expr: function (emit, p, i, t) {
+          emit(x.eval({t:p}), y.eval({t:p}), z.eval({t:p}));
+        },
+        width: 128,
+        channels: 3,
+        range: [0, 2*math.pi],
+      })
+      .line({
+        width: 3,
+        color: blue,
+      });
+    
+    var vector = curveslide.interval({
+        expr: function (emit, p, i, t) {
+          emit(0,0,0);
+          emit(x.eval({t:t}), y.eval({t:t}), z.eval({t:t}));
+        },
+        width: 0,
+        channels: 3,
+        items: 2,
+      })
+      .vector({
+        width: 5,
+        end: true,
+        color: blue,
+      });
+    
+    var derivatives = view.slide({
+      steps: 2,
+    });
+    
+    var deriv1 = derivatives.interval({
+        expr: function (emit, p, i, t) {
+          emit(0,0,0);
+          emit(dx.eval({t:t}), dy.eval({t:t}), dz.eval({t:t}));
+        },
+        width: 0,
+        channels: 3,
+        items: 2,
+      })
+      .vector({
+        width: 5,
+        end: true,
+        color: red,
+      });
+    
+    var deriv2 = derivatives.interval({
+        expr: function (emit, x, i, t) {
+          emit(0,0,0);
+          emit(ddx.eval({t:t}), ddy.eval({t:t}), ddz.eval({t:t}));
+        },
+        width: 0,
+        channels: 3,
+        items: 2,
+      })
+      .vector({
+        width: 5,
+        end: true,
+        color: green,
+      });
+    
+    function noisevector(i, t) {
+      var mult = 2
+      var speed = .1;
+      var vector = math.matrix([mult*noise.simplex3(i, 1, speed * t), mult*noise.simplex3(i, 2, speed * t), mult*noise.simplex3(i, 3, speed * t)]);
+      return vector;
+    }
+    
+    window.onmessage = function(e) {
+      present[0].set('index', e.data.index);
+    }
+      window.onkeydown = function(e) {
+        console.log('keypress!' + e.keyCode);
+        switch(e.keyCode){
+          case 37:
+          case 38:
+            present[0].set('index', present[0].get('index') - 1);
+          break;
+          case 39:
+          case 40:
+            present[0].set('index', present[0].get('index') + 1);
+          break;
+        }
+        console.log(present[0].get('index') + '/' + present[0].get('length'));
+      }
+
+  </script>
+</body>
+</html>
